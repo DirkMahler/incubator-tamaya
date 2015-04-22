@@ -41,12 +41,49 @@ under the License.
 		<cypher><![CDATA[
 			MATCH
 				(sl:ServiceLoader)-[:CONTAINS]->(impl:Type)-[:IMPLEMENTS]->(spi:SPI)
-
 			WHERE
-				NOT split(sl.fileName, '/')[-1] = spi.fqn
-
+				NOT (sl)-[:OF_TYPE]->(spi)
 			RETURN
 				impl.fqn AS impl, spi.fqn as spi, sl.fileName AS spiConfig
+        ]]></cypher>
+	</constraint>
+
+	<concept id="serviceLoader:PropertyConverter">
+		<description>Labels classes implementing "org.apache.tamaya.spi.PropertyConverter" as "PropertyConverter".</description>
+		<cypher><![CDATA[
+			MATCH
+				(impl:Class)-[:IMPLEMENTS]->(propertyConverter:Interface)
+			WHERE
+				propertyConverter.fqn = "org.apache.tamaya.spi.PropertyConverter"
+			SET
+				impl:PropertyConverter
+			RETURN
+				impl
+        ]]></cypher>
+	</concept>
+
+	<constraint id="serviceLoader:PropertyConverterMustBeRegisteredAsService">
+		<requiresConcept refId="serviceLoader:PropertyConverter"/>
+		<description>All property converter implementations must be declared in a service loader file.</description>
+		<cypher><![CDATA[
+			MATCH
+				(impl:PropertyConverter)
+			WHERE
+				NOT (:ServiceLoader)-[:CONTAINS]->(impl)
+			RETURN
+				impl.fqn as UndeclaredPropertyConverter
+        ]]></cypher>
+	</constraint>
+
+	<constraint id="serviceLoader:NonExistingServiceImplementation">
+		<description>All declared services must reference an existing implementation.</description>
+		<cypher><![CDATA[
+			MATCH
+				(sl:ServiceLoader)-[:CONTAINS]->(service:Type)
+			WHERE
+				NOT (service:Class)
+			RETURN
+				sl.fileName as ServiceLoaderFile, service.fqn as NonExistingServiceImplementation
         ]]></cypher>
 	</constraint>
 

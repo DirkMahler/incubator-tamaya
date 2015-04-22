@@ -56,5 +56,7 @@ under the License.
         <includeConstraint refId="naming:namingOfPropertyConverters"/>
         <includeConstraint refId="naming:namingOfPropertyFilters"/>
         <includeConstraint refId="serviceLoader:correctServiceLoaderNaming"/>
+        <includeConstraint refId="serviceLoader:PropertyConverterMustBeRegisteredAsService"/>
+        <includeConstraint refId="serviceLoader:NonExistingServiceImplementation"/>
     </group>
 </jqa:jqassistant-rules>
